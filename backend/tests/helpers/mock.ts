@@ -19,8 +19,11 @@ export const prismaMock = {
   },
 };
 
-const absolutePrismaPath = join(import.meta.dirname, "../../src/lib/prisma.ts");
+// Only mock the Prisma module for unit tests (not integration tests)
+if (!process.env["INTEGRATION"]) {
+  const absolutePrismaPath = join(import.meta.dirname, "../../src/lib/prisma.ts");
 
-mock.module(absolutePrismaPath, () => ({
-  default: prismaMock,
-}));
+  mock.module(absolutePrismaPath, () => ({
+    default: prismaMock,
+  }));
+}
