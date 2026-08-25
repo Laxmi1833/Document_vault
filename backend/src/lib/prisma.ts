@@ -1,8 +1,7 @@
 // Prisma client singleton
-// Note: Run `bunx prisma generate` after creating the schema to generate the client.
-// This file will be fully functional after Phase 3 (Prisma migration).
+// Generated client lives at src/generated/prisma (configured in schema.prisma)
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma";
 
 const prisma = new PrismaClient();
 
