@@ -1,4 +1,6 @@
 import prisma from "../lib/prisma.ts";
+import { validateNonEmpty, validateSlug } from "../validators/index.ts";
+import { GraphQLError } from "graphql";
 
 export const collectionResolvers = {
   Query: {
@@ -16,12 +18,24 @@ export const collectionResolvers = {
       _parent: any,
       { input }: { input: { name: string; slug: string } }
     ) => {
-      return prisma.collection.create({
-        data: {
-          name: input.name,
-          slug: input.slug,
-        },
-      });
+      const validatedName = validateNonEmpty(input.name, "name");
+      const validatedSlug = validateSlug(input.slug);
+
+      try {
+        return await prisma.collection.create({
+          data: {
+            name: validatedName,
+            slug: validatedSlug,
+          },
+        });
+      } catch (error: any) {
+        if (error.code === "P2002") {
+          throw new GraphQLError(`Collection with slug "${validatedSlug}" already exists`, {
+            extensions: { code: "CONFLICT" },
+          });
+        }
+        throw error;
+      }
     },
   },
   Collection: {

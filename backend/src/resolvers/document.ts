@@ -1,4 +1,6 @@
 import prisma from "../lib/prisma.ts";
+import { validateNonEmpty } from "../validators/index.ts";
+import { GraphQLError } from "graphql";
 
 interface DocumentsArgs {
   collectionId?: string;
@@ -65,10 +67,22 @@ export const documentResolvers = {
       _parent: any,
       { input }: { input: { title: string; content: string; tags?: string[]; collectionId: string } }
     ) => {
+      const title = validateNonEmpty(input.title, "title");
+      const content = validateNonEmpty(input.content, "content");
+      
+      const collection = await prisma.collection.findUnique({
+        where: { id: input.collectionId },
+      });
+      if (!collection) {
+        throw new GraphQLError(`Collection with ID "${input.collectionId}" not found`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      
       return prisma.document.create({
         data: {
-          title: input.title,
-          content: input.content,
+          title,
+          content,
           tags: input.tags || [],
           collectionId: input.collectionId,
         },
@@ -78,10 +92,21 @@ export const documentResolvers = {
       _parent: any,
       { id, input }: { id: string; input: { title?: string; content?: string; tags?: string[]; isArchived?: boolean } }
     ) => {
+      const doc = await prisma.document.findUnique({ where: { id } });
+      if (!doc) {
+        throw new GraphQLError(`Document with ID "${id}" not found`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      
       const data: any = {};
       
-      if (input.title !== undefined) data.title = input.title;
-      if (input.content !== undefined) data.content = input.content;
+      if (input.title !== undefined) {
+        data.title = validateNonEmpty(input.title, "title");
+      }
+      if (input.content !== undefined) {
+        data.content = validateNonEmpty(input.content, "content");
+      }
       if (input.tags !== undefined) data.tags = input.tags;
       if (input.isArchived !== undefined) data.isArchived = input.isArchived;
       
@@ -91,11 +116,34 @@ export const documentResolvers = {
       });
     },
     deleteDocument: async (_parent: any, { id }: { id: string }) => {
+      const doc = await prisma.document.findUnique({ where: { id } });
+      if (!doc) {
+        throw new GraphQLError(`Document with ID "${id}" not found`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      
       return prisma.document.delete({
         where: { id },
       });
     },
     moveDocument: async (_parent: any, { id, collectionId }: { id: string; collectionId: string }) => {
+      const doc = await prisma.document.findUnique({ where: { id } });
+      if (!doc) {
+        throw new GraphQLError(`Document with ID "${id}" not found`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      
+      const collection = await prisma.collection.findUnique({
+        where: { id: collectionId },
+      });
+      if (!collection) {
+        throw new GraphQLError(`Collection with ID "${collectionId}" not found`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      
       return prisma.document.update({
         where: { id },
         data: {
