@@ -1,7 +1,8 @@
+import { collectionResolvers } from "./collection.ts";
+
 export const resolvers = {
   Query: {
-    collections: () => [],
-    collection: () => null,
+    ...collectionResolvers.Query,
     documents: () => ({
       edges: [],
       pageInfo: {
@@ -11,12 +12,7 @@ export const resolvers = {
     }),
   },
   Mutation: {
-    createCollection: (_parent: any, { input }: any) => ({
-      id: "stub-id",
-      name: input.name,
-      slug: input.slug,
-      createdAt: new Date().toISOString(),
-    }),
+    ...collectionResolvers.Mutation,
     createDocument: (_parent: any, { input }: any) => ({
       id: "stub-id",
       title: input.title,
@@ -52,5 +48,8 @@ export const resolvers = {
       isArchived: false,
       createdAt: new Date().toISOString(),
     }),
+  },
+  Collection: {
+    ...collectionResolvers.Collection,
   },
 };
