@@ -1,8 +1,18 @@
 import { createServer } from "node:http";
-import { createYoga } from "graphql-yoga";
+import { createSchema, createYoga } from "graphql-yoga";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { resolvers } from "./resolvers/index.ts";
 
-// Placeholder — will be wired up in Phase 5
-const yoga = createYoga({});
+// Read GraphQL Schema SDL
+const typeDefs = readFileSync(join(import.meta.dirname, "schema.graphql"), "utf-8");
+
+const schema = createSchema({
+  typeDefs,
+  resolvers,
+});
+
+const yoga = createYoga({ schema });
 
 const server = createServer(yoga);
 
