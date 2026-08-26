@@ -1,9 +1,18 @@
-// Prisma client singleton
-// Note: Run `bunx prisma generate` after creating the schema to generate the client.
-// This file will be fully functional after Phase 3 (Prisma migration).
+import { PrismaClient } from "../generated/prisma";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
-import { PrismaClient } from "@prisma/client";
+// Load environment variables for local development
+if (typeof process.loadEnvFile === "function") {
+  try {
+    process.loadEnvFile();
+  } catch (e) {
+    // Ignore if not present
+  }
+}
 
-const prisma = new PrismaClient();
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 export default prisma;
