@@ -13,7 +13,8 @@
     "test:unit": "bun test --preload ./tests/helpers/mock.ts tests/unit/",
     "test:integration": "bun test tests/integration/",
     "lint": "bunx tsc --noEmit",
-    "typecheck": "bunx tsc --noEmit"
+    "typecheck": "bunx tsc --noEmit",
+    "sanity": "bun run lint && bun run typecheck && bun run test"
   },
   "devDependencies": {
     "@types/bun": "latest",
