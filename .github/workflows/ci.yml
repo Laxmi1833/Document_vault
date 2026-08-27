@@ -58,4 +58,3 @@ jobs:
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5433/document_vault?schema=public
-          INTEGRATION: "true"
